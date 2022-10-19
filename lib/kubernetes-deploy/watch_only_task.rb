@@ -53,7 +53,7 @@ module KubernetesDeploy
 
       @logger.info("Will look for the following resources in #{@context}/#{@namespace}:")
       resources.each do |r|
-        r.deploy_started_at = 5.minutes.ago # arbitrary time in the past
+        r.deploy_started_at =  Time.now.utc-5*60
         @logger.info("  - #{r.id}")
       end
       resources
