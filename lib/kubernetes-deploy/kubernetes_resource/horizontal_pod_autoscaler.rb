@@ -16,7 +16,7 @@ module KubernetesDeploy
     end
 
     def kubectl_resource_type
-      'hpa.v2beta1.autoscaling'
+      'autoscaling/v2'
     end
 
     def status
