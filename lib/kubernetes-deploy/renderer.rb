@@ -45,7 +45,7 @@ module KubernetesDeploy
       erb_binding = TemplateContext.new(self).template_binding
       bind_template_variables(erb_binding, template_variables)
 
-      ERB.new(raw_template, nil, '-').result(erb_binding)
+      ERB.new(raw_template, trim_mode: '-').result(erb_binding)
     rescue InvalidPartialError => err
       err.parents = err.parents.dup.unshift(filename)
       err.filename = "#{err.filename} (partial included from: #{err.parents.join(' -> ')})"
@@ -62,9 +62,9 @@ module KubernetesDeploy
 
       partial_path = find_partial(partial)
       template = File.read(partial_path)
-      expanded_template = ERB.new(template, nil, '-').result(erb_binding)
+      expanded_template = ERB.new(template, trim_mode: '-').result(erb_binding)
 
-      docs = Psych.parse_stream(expanded_template, partial_path)
+      docs = Psych.parse_stream(expanded_template, filename: partial_path)
       # If the partial contains multiple documents or has an explicit document header,
       # we know it cannot validly be indented in the parent, so return it immediately.
       return expanded_template unless docs.children.one? && docs.children.first.implicit
@@ -89,7 +89,7 @@ module KubernetesDeploy
       file_content = File.read(File.join(@template_dir, filename))
       rendered_content = render_template(filename, file_content)
 
-      YAML.load_stream(rendered_content, "<rendered> #{filename}") do |doc|
+      YAML.load_stream(rendered_content, filename: "<rendered> #{filename}") do |doc|
         next if doc.blank?
         unless doc.is_a?(Hash)
           raise InvalidTemplateError.new("Template is not a valid Kubernetes manifest",
